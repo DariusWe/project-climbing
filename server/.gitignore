@@ -1,7 +1,5 @@
 # Logs
 node_modules
 dist
-dist-ssr
-*.local
 documentation.txt
 .env
