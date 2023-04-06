@@ -69,11 +69,23 @@ button:focus-visible {
   }
 }
 
-.mapbox-popup {
-  
-}
-
 .mapboxgl-popup-content {
   color: black;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-width: 320px;
+  padding: 0;
+  border-radius: 10px;
+
+  .mapbox-popup-img {
+    width: 100%;
+    min-height: 180px;
+    background-color: #eeeeee;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+
+  .mapbox-popup-right-side {
+    padding: 15px 12px;
+  }
 }

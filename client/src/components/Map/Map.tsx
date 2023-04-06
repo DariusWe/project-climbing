@@ -24,6 +24,9 @@ const Map = () => {
       // style: "mapbox://styles/mapbox/satellite-streets-v12",
       center: [21.472858, 38.181548],
       zoom: 9,
+      minZoom: 3,
+      pitchWithRotate: false,
+      dragRotate: false,
     });
 
     mapAlreadyExists.current = true;
@@ -33,6 +36,19 @@ const Map = () => {
         if (error || image === undefined) throw error;
         map.addImage("custom-marker", image);
         map.addSource("points", SPOTS);
+        map.addLayer({
+          id: "cluster-shadow",
+          type: "circle",
+          source: "points",
+          filter: ["has", "point_count"],
+          paint: {
+            "circle-color": "#000",
+            "circle-opacity": 0.2,
+            "circle-radius": ["step", ["get", "point_count"], 21, 5, 28, 20, 35],
+            "circle-blur": 0.9,
+            "circle-translate": [3, 5],
+          },
+        });
         map.addLayer({
           id: "clusters",
           type: "circle",
@@ -44,8 +60,11 @@ const Map = () => {
             //   * Blue, 20px circles when point count is less than 100
             //   * Yellow, 30px circles when point count is between 100 and 750
             //   * Pink, 40px circles when point count is greater than or equal to 750
-            "circle-color": ["step", ["get", "point_count"], "#51bbd6", 100, "#f1f075", 750, "#f28cb1"],
-            "circle-radius": ["step", ["get", "point_count"], 20, 100, 30, 750, 40],
+            // "circle-color": "#f8c304",
+            // "circle-color": "#ecc76f",
+            // "circle-color": "#ffe921",
+            "circle-color": "#fff",
+            "circle-radius": ["step", ["get", "point_count"], 15, 5, 20, 20, 25],
           },
         });
         map.addLayer({
@@ -60,14 +79,29 @@ const Map = () => {
           },
         });
         map.addLayer({
-          id: "unclustered-point",
-          type: "symbol",
+          id: "unclustered-point-shadow",
+          type: "circle",
           source: "points",
           filter: ["!", ["has", "point_count"]],
-          layout: {
-            "icon-image": "custom-marker",
-            // "icon-anchor": "bottom",
-            "icon-size": 0.32,
+          paint: {
+            "circle-color": "#000",
+            "circle-opacity": 0,
+            "circle-radius": 10,
+            "circle-blur": 0.9,
+            "circle-translate": [2, 3],
+          },
+        });
+        map.addLayer({
+          id: "unclustered-point",
+          type: "circle",
+          source: "points",
+          filter: ["!", ["has", "point_count"]],
+          paint: {
+            "circle-radius": 5,
+            "circle-color": "#fff",
+            "circle-stroke-width": 1,
+            "circle-stroke-color": "#333",
+            //"circle-stroke-opacity": 0.1,
           },
         });
       });
@@ -105,16 +139,21 @@ const Map = () => {
       // TS complaining about coordinates being of type Number[] instead of LngLatLike even though it's derived from Mapbox own types...
       const coordinates = e.features[0].geometry.coordinates.slice() as LngLatLike;
       const description = `Name: ${name}`;
+      const html = `<div class="mapbox-popup-img"></div>
+                    <div class="mapbox-popup-right-side">
+                      <h3>Name of site</h3>
+                      <p>Some more infos like number of routes and grades</p>
+                    </div>`;
 
-      new mapboxgl.Popup({className: "mapbox-popup"}).setLngLat(coordinates).setHTML(description).addTo(map);
+      new mapboxgl.Popup({ offset: 8 }).setLngLat(coordinates).setHTML(html).addTo(map);
     });
 
-    map.on("mouseenter", "unclustered-point", () => {
+    map.on("mouseenter", ["unclustered-point", "clusters"], () => {
       map.getCanvas().style.cursor = "pointer";
     });
 
     // Change it back to a pointer when it leaves.
-    map.on("mouseleave", "unclustered-point", () => {
+    map.on("mouseleave", ["unclustered-point", "clusters"], () => {
       map.getCanvas().style.cursor = "";
     });
   }, [mapContainer.current]);
