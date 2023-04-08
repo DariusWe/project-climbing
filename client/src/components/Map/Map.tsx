@@ -1,42 +1,46 @@
 import classes from "./Map.module.scss";
-import mapboxgl, { LngLatLike, GeoJSONSource } from "mapbox-gl";
-import { useRef, useState, useEffect } from "react";
-import SPOTS from "../../utils/spots";
+import mapboxgl, { LngLatLike, GeoJSONSource, GeoJSONSourceRaw, Map } from "mapbox-gl";
+import { useRef, useEffect } from "react";
 import markerImage from "../../assets/marker.png";
 
-mapboxgl.accessToken = "pk.eyJ1IjoiZGFyaXVzMjIyIiwiYSI6ImNsZzJjbWh3MDA0Mnozcm1td3Exd2xsa2kifQ.ijV6fV1M7vbW32bWUDU6LA";
+type WorldMapProps = {
+  geoData: GeoJSONSourceRaw | undefined;
+};
 
-const Map = () => {
+const WorldMap: React.FC<WorldMapProps> = ({ geoData }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
-  const mapAlreadyExists = useRef(false);
-  // const [lng, setLng] = useState(-70.9);
-  // const [lat, setLat] = useState(42.35);
-  // const [zoom, setZoom] = useState(9);
+  const map = useRef<Map | null>();
 
+  // Paint the map
   useEffect(() => {
-    if (mapAlreadyExists.current || !mapContainer.current) return; // If there already is a map or mapContainer is null, return.
+    if (map.current || !mapContainer.current) return;
 
-    const map = new mapboxgl.Map({
+    mapboxgl.accessToken =
+      "pk.eyJ1IjoiZGFyaXVzMjIyIiwiYSI6ImNsZzJjbWh3MDA0Mnozcm1td3Exd2xsa2kifQ.ijV6fV1M7vbW32bWUDU6LA";
+
+    map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/darius222/clg2xknp3005g01myy2e6p5rn",
-      // style: "mapbox://styles/darius222/clg2rtpq6006801nrt2vhicdj",
-      // style: "mapbox://styles/mapbox/outdoors-v12",
-      // style: "mapbox://styles/mapbox/satellite-streets-v12",
       center: [21.472858, 38.181548],
       zoom: 9,
       minZoom: 3,
       pitchWithRotate: false,
       dragRotate: false,
     });
+  }, [mapContainer.current]);
 
-    mapAlreadyExists.current = true;
+  // When geoData fetching is successfull, add data to map.
+  // This useEffect is a mess. Even though i am running map.current.on("load", () => {}), typescript will tell me
+  // in the following lines that map could be null or undefined. So everytime i use map.current i have to cast it as type Map.
+  useEffect(() => {
+    if (!geoData || !map.current) return;
 
-    map.on("load", () => {
-      map.loadImage(markerImage, (error, image) => {
+    map.current.on("load", () => {
+      (map.current as Map).loadImage(markerImage, (error, image) => {
         if (error || image === undefined) throw error;
-        map.addImage("custom-marker", image);
-        map.addSource("points", SPOTS);
-        map.addLayer({
+        (map.current as Map).addImage("custom-marker", image);
+        (map.current as Map).addSource("points", geoData);
+        (map.current as Map).addLayer({
           id: "cluster-shadow",
           type: "circle",
           source: "points",
@@ -49,7 +53,7 @@ const Map = () => {
             "circle-translate": [3, 5],
           },
         });
-        map.addLayer({
+        (map.current as Map).addLayer({
           id: "clusters",
           type: "circle",
           source: "points",
@@ -67,7 +71,7 @@ const Map = () => {
             "circle-radius": ["step", ["get", "point_count"], 15, 5, 20, 20, 25],
           },
         });
-        map.addLayer({
+        (map.current as Map).addLayer({
           id: "cluster-count",
           type: "symbol",
           source: "points",
@@ -78,7 +82,7 @@ const Map = () => {
             "text-size": 12,
           },
         });
-        map.addLayer({
+        (map.current as Map).addLayer({
           id: "unclustered-point-shadow",
           type: "circle",
           source: "points",
@@ -91,7 +95,7 @@ const Map = () => {
             "circle-translate": [2, 3],
           },
         });
-        map.addLayer({
+        (map.current as Map).addLayer({
           id: "unclustered-point",
           type: "circle",
           source: "points",
@@ -108,23 +112,23 @@ const Map = () => {
     });
 
     // inspect a cluster on click
-    map.on("click", "clusters", (e) => {
-      const features = map.queryRenderedFeatures(e.point, {
+    (map.current as Map).on("click", "clusters", (e) => {
+      const features = (map.current as Map).queryRenderedFeatures(e.point, {
         layers: ["clusters"],
       });
       if (!features[0] || !features[0].properties) return;
       const clusterId = features[0].properties.cluster_id;
-      (map.getSource("points") as GeoJSONSource).getClusterExpansionZoom(clusterId, (err, zoom) => {
+      ((map.current as Map).getSource("points") as GeoJSONSource).getClusterExpansionZoom(clusterId, (err, zoom) => {
         if (err) return;
         if (features[0].geometry.type !== "Point") return;
-        map.easeTo({
+        (map.current as Map).easeTo({
           center: features[0].geometry.coordinates as LngLatLike,
           zoom: zoom,
         });
       });
     });
 
-    map.on("click", "unclustered-point", (e) => {
+    (map.current as Map).on("click", "unclustered-point", (e) => {
       // Typescript is complaining about a bunch of variables that could either be null or undefined or can't be found
       // because of stupid fucking reasons that i have no control over. Why does everyone like typescript so much again?
       if (
@@ -145,20 +149,23 @@ const Map = () => {
                       <p>Some more infos like number of routes and grades</p>
                     </div>`;
 
-      new mapboxgl.Popup({ offset: 8 }).setLngLat(coordinates).setHTML(html).addTo(map);
+      new mapboxgl.Popup({ offset: 8 })
+        .setLngLat(coordinates)
+        .setHTML(html)
+        .addTo(map.current as Map);
     });
 
-    map.on("mouseenter", ["unclustered-point", "clusters"], () => {
-      map.getCanvas().style.cursor = "pointer";
+    (map.current as Map).on("mouseenter", ["unclustered-point", "clusters"], () => {
+      (map.current as Map).getCanvas().style.cursor = "pointer";
     });
 
     // Change it back to a pointer when it leaves.
-    map.on("mouseleave", ["unclustered-point", "clusters"], () => {
-      map.getCanvas().style.cursor = "";
+    (map.current as Map).on("mouseleave", ["unclustered-point", "clusters"], () => {
+      (map.current as Map).getCanvas().style.cursor = "";
     });
-  }, [mapContainer.current]);
+  }, [geoData]);
 
   return <div ref={mapContainer} className={classes.mapContainer} />;
 };
 
-export default Map;
+export default WorldMap;
