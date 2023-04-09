@@ -1,4 +1,4 @@
-export interface Wall {
+export interface Crag {
   id: number;
   name: string;
   latitude: number;

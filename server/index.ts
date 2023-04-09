@@ -18,7 +18,7 @@ const pool = mysql.createPool({
 });
 
 app.get("/", (req, res) => {
-  const sqlSelect = "SELECT * FROM walls";
+  const sqlSelect = "SELECT * FROM crags";
   pool.query(sqlSelect, (error, result) => {
     error && console.log(error);
     res.json(result);

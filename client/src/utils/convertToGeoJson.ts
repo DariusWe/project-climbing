@@ -1,21 +1,21 @@
-import type { Wall } from "../api/types";
+import type { Crag } from "../api/types";
 import { GeoJSONSourceRaw } from "mapbox-gl";
 import { Feature } from "geojson";
 
-const convertToGeoJson = (walls: Wall[]): GeoJSONSourceRaw => {
-  // Convert walls array to Mapbox 'Feature' type
-  const featureArray: Feature[] = walls.map((wall) => {
+const convertToGeoJson = (crags:Crag[]): GeoJSONSourceRaw => {
+  // Convert crags array to Mapbox 'Feature' type
+  const featureArray: Feature[] = crags.map((crag) => {
     return {
       type: "Feature",
       geometry: {
         type: "Point",
-        coordinates: [wall.longitude, wall.latitude],
+        coordinates: [crag.longitude, crag.latitude],
       },
       properties: {
-        id: wall.id,
-        name: wall.name,
-        imgUrl: wall.img_url,
-        description: wall.description,
+        id: crag.id,
+        name: crag.name,
+        imgUrl: crag.img_url,
+        description: crag.description,
       },
     };
   });

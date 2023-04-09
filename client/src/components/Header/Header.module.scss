@@ -2,26 +2,68 @@
   position: fixed;
   top: 0;
   width: 100vw;
-  height: 70px;
-  background-color: rgba(0, 0, 0, 0.2);
-  padding: 0 1%;
+  height: 45px;
+  background-color: white;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
   z-index: 2;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
 
-  .logo {
-    padding: 10px;
-    margin: 0 20px;
+  // Padding and align-items: center in a mixed-in? Right now only first childrens of .header are affected, .add and sign-in have an 
+  // unnecessary redeclaration of these properties.
+
+  & > * {
+    display: flex;
+    align-items: center;
+    padding: 0 50px;
   }
 
-  ul {
-    display: flex;
-    list-style: none;
+  .logo {
+    font-weight: 800;
+  }
+
+  .searchbar {
+    width: 400px;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    color: rgb(146, 146, 146);
+  }
+
+  .filter {
+    color: rgb(146, 146, 146);
+  }
+
+  .rightSide {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    padding: 0;
+
+    .add {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      padding: 0 50px;
+      border-left: 1px solid #ccc;
+      border-right: 1px solid #ccc;
+      cursor: pointer;
+      
+      &:hover {
+        background-color: black;
+        color: white;
+      }
+    }
 
     a {
-      padding: 10px;
-      margin: 0 20px;
+      display: flex;
+      align-items: center;
+      height: 100%;
+      padding: 0 50px;
+      font-weight: 800;
+      &:hover {
+        background-color: black;
+        color: white;
+      }
     }
   }
 }
