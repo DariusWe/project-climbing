@@ -1,0 +1,44 @@
+.container {
+  position: absolute;
+  top: 45px;
+  left: 0;
+  height: calc(100vh - 45px);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.6);
+  z-index: 2;
+
+  .popup {
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 50px;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 8px 12px 32px rgba(0, 0, 0, 0.1);
+
+    form {
+      display: flex;
+      flex-direction: column;
+      padding-top: 15px;
+
+      .mapContainer {
+        width: 100%;
+        height: 240px;
+      }
+
+      .coordinates {
+        margin-top: 20px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+
+        & > * {
+          width: 47%;
+        }
+      }
+    }
+  }
+}

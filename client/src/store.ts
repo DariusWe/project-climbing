@@ -1,17 +1,17 @@
 import { create } from "zustand";
 
 type State = {
-  mapMode: "search" | "setCoordinates";
+  addCragPopupOpen: boolean;
 };
 
 type Action = {
-  updateMapMode: (mapMode: State["mapMode"]) => void;
+  setAddCragPopupOpen: (boolean: boolean) => void;
 };
 
 // Create Store
 const useStore = create<State & Action>()((set) => ({
-  mapMode: "search",
-  updateMapMode: (mapMode) => set(() => ({ mapMode: mapMode })),
+  addCragPopupOpen: false,
+  setAddCragPopupOpen: (boolean) => set(() => ({ addCragPopupOpen: boolean })),
 }));
 
 export default useStore;

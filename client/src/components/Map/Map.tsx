@@ -1,8 +1,7 @@
 import classes from "./Map.module.scss";
 import mapboxgl, { LngLatLike, GeoJSONSource, GeoJSONSourceRaw, Map } from "mapbox-gl";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import markerImage from "../../assets/marker.png";
-import useStore from "../../store";
 
 type WorldMapProps = {
   geoData: GeoJSONSourceRaw | undefined;
@@ -11,9 +10,6 @@ type WorldMapProps = {
 const mapboxToken = import.meta.env.VITE_APP_MAPBOX_TOKEN;
 
 const WorldMap: React.FC<WorldMapProps> = ({ geoData }) => {
-  // Get currently active mode of the map
-  const [mapMode, updateMapMode] = useStore((state) => [state.mapMode, state.updateMapMode]);
-
   // Get reference to the HTML-Element that will contain the map
   const mapContainer = useRef<HTMLDivElement | null>(null);
 
@@ -168,20 +164,6 @@ const WorldMap: React.FC<WorldMapProps> = ({ geoData }) => {
       new mapboxgl.Popup({ offset: 8 }).setLngLat(lngLat).setHTML(`<span>${lngLat}</span>`).addTo(map.current!);
     });
   }, [geoData]);
-
-  useEffect(() => {
-    if (!map.current || !map.current.isStyleLoaded()) return;
-    if (mapMode === "setCoordinates") {
-      map.current!.setLayoutProperty("unclustered-point", "visibility", "none");
-      map.current!.on("move", () => {
-        const langLat = map.current!.getCenter();
-        // Set centerCoordinates in global state
-        console.log(langLat);
-      });
-    } else {
-      map.current!.setLayoutProperty("unclustered-point", "visibility", "visible");
-    }
-  }, [mapMode]);
 
   return <div ref={mapContainer} className={classes.mapContainer} />;
 };

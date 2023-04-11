@@ -2,7 +2,7 @@ import classes from "./Header.module.scss";
 import useStore from "../../store";
 
 const Header = () => {
-  const [mapMode, updateMapMode] = useStore((state) => [state.mapMode, state.updateMapMode]);
+  const [addCragPopupOpen, setAddCragPopupOpen] = useStore((state) => [state.addCragPopupOpen, state.setAddCragPopupOpen]);
 
   return (
     <header className={classes.header}>
@@ -17,8 +17,8 @@ const Header = () => {
         <span>Filter ...</span>
       </div>
       <div className={classes.rightSide}>
-        {mapMode === "search" && <span className={classes.add} onClick={() => updateMapMode("setCoordinates")}>Add +</span>}
-        {mapMode === "setCoordinates" && <span className={classes.add} onClick={() => updateMapMode("search")}>Map</span>}
+        {!addCragPopupOpen && <span className={classes.add} onClick={() => setAddCragPopupOpen(true)}>Add +</span>}
+        {addCragPopupOpen && <span className={classes.add} onClick={() => setAddCragPopupOpen(false)}>Map</span>}
         <a href="#">Sign in</a>
       </div>
     </header>

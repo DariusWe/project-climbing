@@ -1,0 +1,31 @@
+.formInput {
+  display: flex;
+  flex-direction: column;
+
+  input {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 6px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    &:focus {
+      outline: none;
+      border: 1px solid #aaa;
+    }
+  }
+
+  // Hide increment/decrement buttons on chrome:
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+
+  // Hide increment/decrement buttons on firefox:
+  input[type="number"] {
+    appearance: textfield;
+  }
+
+  input[type="file"] {
+    border: none;
+  }
+}
