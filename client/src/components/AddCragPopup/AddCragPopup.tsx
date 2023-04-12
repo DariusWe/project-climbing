@@ -9,8 +9,8 @@ const mapboxToken = import.meta.env.VITE_APP_MAPBOX_TOKEN;
 
 const AddCragPopup = () => {
   const [name, setName] = useState<string>("");
-  const [latitude, setLatitude] = useState(38.181548);
-  const [longitude, setLongitude] = useState(21.472858);
+  const [latitude, setLatitude] = useState("38.181548");
+  const [longitude, setLongitude] = useState("21.472858");
   const [description, setDescription] = useState<string>("");
   const [image, setImage] = useState<File>();
 
@@ -46,8 +46,8 @@ const AddCragPopup = () => {
 
     map.current.on("move", () => {
       marker.setLngLat(map.current!.getCenter());
-      setLatitude(parseFloat(map.current!.getCenter().lat.toFixed(6)));
-      setLongitude(parseFloat(map.current!.getCenter().lng.toFixed(6)));
+      setLatitude(map.current!.getCenter().lat.toFixed(6));
+      setLongitude(map.current!.getCenter().lng.toFixed(6));
     });
   }, [mapContainer.current]);
 
@@ -60,29 +60,52 @@ const AddCragPopup = () => {
     }
   };
 
+  const validateUserInput = () => {
+    // Name matches regex?
+    // Coordinates in range and only numbers?
+    // Description length okay?
+    // File type is image and size < 10mb?
+    // If all okay, return feedback="valid"
+    // If not, set error messages
+    // input component will receive and display error message
+    // onFocus, errorMessage will be reset
+  }
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!image) return;
-    const uploadTask = uploadToFirebaseStorage(image);
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        // Display progress to user
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-      },
-      (error) => {
-        // Display error to user
-        console.log(error);
-      },
-      async () => {
-        const downloadURL = await getDownloadUrl(uploadTask.snapshot.ref);
-        // Save downloadURL in db
-      }
-    );
+    const userInputValid = validateUserInput();
+    // if (userInputValid) send to db
+    if (image) {
+      const uploadTask = uploadToFirebaseStorage(image);
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          // Display progress to user
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        },
+        (error) => {
+          // Display error to user
+          console.log(error);
+        },
+        async () => {
+          const downloadURL = await getDownloadUrl(uploadTask.snapshot.ref);
+          console.log(name);
+          console.log(latitude);
+          console.log(longitude);
+          console.log(description);
+          console.log(downloadURL);
+        }
+      );
+    } else {
+      console.log(name);
+      console.log(latitude);
+      console.log(longitude);
+      console.log(description);
+    }
     // Include closeBtn on Popup
     // Limit upload file size, check for file type and give corresponding errors
     // Check user input and show error messages below inputs
-    // If no errors, make Post request to server/post-new-crag 
+    // If no errors, make Post request to server/post-new-crag
     // (do this after image downloadUrl has been retrieved)
     // Otherwise you would have to do two queries.
     // No optimistic update here, as form should be displayed until really successfull.
@@ -107,35 +130,55 @@ const AddCragPopup = () => {
             type="text"
             id="name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            addOnChange={(e) => setName(e.target.value)}
+            pattern="^[A-Za-z ]{3,20}$"
+            errorMessage="Name should be 3 - 20 characters and not contain any special characters"
           />
           <div ref={mapContainer} className={classes.mapContainer} />
           <div className={classes.coordinates}>
             <FormInput
               label="Latitude"
-              type="number"
+              type="text"
               id="latitude"
               value={latitude}
-              onChange={(e) => setLatitude(parseFloat(e.target.value))}
-              onBlur={(e) => map.current!.flyTo({ center: [longitude, parseFloat(e.target.value)] })}
+              addOnChange={(e) => setLatitude(e.target.value)}
+              addOnBlur={() => map.current!.flyTo({ center: [parseFloat(longitude), parseFloat(latitude)] })}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  map.current!.flyTo({ center: [parseFloat(longitude), parseFloat(latitude)] });
+                }
+              }}
+              pattern="^-?(?:90(?:\.0+)?|[1-8]?\d(?:\.\d+)?|\d+\.)$"
+              errorMessage="Accepted value range: [-90, 90]"
+              required
             />
             <FormInput
               label="Longitude"
-              type="number"
+              type="text"
               id="longitude"
               value={longitude}
-              onChange={(e) => setLongitude(parseFloat(e.target.value))}
-              onBlur={(e) => map.current!.flyTo({ center: [parseFloat(e.target.value), latitude] })}
+              addOnChange={(e) => setLongitude(e.target.value)}
+              addOnBlur={() => map.current!.flyTo({ center: [parseFloat(longitude), parseFloat(latitude)] })}
+              pattern="^-?(?:180(?:\.0+)?|\d{1,2}(?:\.\d+)?|1[0-7]\d(?:\.\d+)?|\d+\.)$"
+              errorMessage="Accepted value range: [-180, 180]"
+              required
             />
           </div>
-          <label htmlFor="description">Description</label>
+          <label htmlFor="description">Description (optional)</label>
           <textarea
             id="description"
-            placeholder="What kind of rock? What kind of climbing? How to get to it? ..."
+            placeholder="What kind of rock? What kind of climbing? How to get to there? ..."
             onChange={(e) => setDescription(e.target.value)}
             value={description}
           />
-          <FormInput label="Upload an image" type="file" id="image" onChange={handleFileInputChange} />
+          <FormInput
+            label="Upload an image (optional)"
+            type="file"
+            id="image"
+            addOnChange={handleFileInputChange}
+            errorMessage="File should be an image and file size max. 10mb"
+          />
           <button type="submit">Submit</button>
         </form>
         <span></span>

@@ -1,13 +1,14 @@
 .formInput {
   display: flex;
   flex-direction: column;
+  position: relative;
 
   input {
     border: 1px solid #ccc;
     border-radius: 3px;
     padding: 6px;
     margin-top: 5px;
-    margin-bottom: 15px;
+    margin-bottom: 25px;
     &:focus {
       outline: none;
       border: 1px solid #aaa;
@@ -27,5 +28,17 @@
 
   input[type="file"] {
     border: none;
+  }
+
+  .errorMessage {
+    position: absolute;
+    bottom: 7px;
+    font-size: 11px;
+    color: rgb(227, 6, 6);
+    display: none;
+  }
+
+  input:invalid ~ .errorMessage {
+    display: block;
   }
 }
