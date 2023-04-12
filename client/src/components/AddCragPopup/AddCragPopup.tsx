@@ -1,5 +1,5 @@
 import classes from "./AddCragPopup.module.scss";
-import React, { useState, useRef, useEffect, FormEvent } from "react";
+import { useState, useRef, useEffect, FormEvent } from "react";
 import mapboxgl, { Map } from "mapbox-gl";
 import markerImage from "../../assets/marker.png";
 import FormInput from "../FormInput/FormInput";
@@ -8,11 +8,17 @@ import { getDownloadUrl, uploadToFirebaseStorage } from "../../utils/firebase.ut
 const mapboxToken = import.meta.env.VITE_APP_MAPBOX_TOKEN;
 
 const AddCragPopup = () => {
-  const [name, setName] = useState<string>("");
+  const [name, setName] = useState("");
   const [latitude, setLatitude] = useState("38.181548");
   const [longitude, setLongitude] = useState("21.472858");
-  const [description, setDescription] = useState<string>("");
+  const [description, setDescription] = useState("");
   const [image, setImage] = useState<File>();
+
+  const [nameErrorMsg, setNameErrorMsg] = useState("");
+  const [latitudeErrorMsg, setLatitudeErrorMsg] = useState("");
+  const [longitudeErrorMsg, setLongitudeErrorMsg] = useState("");
+  const [descriptionErrorMsg, setDescriptionErrorMsg] = useState("");
+  const [imageErrorMsg, setImageErrorMsg] = useState("");
 
   // Get reference to the HTML-Element that will contain the map
   const mapContainer = useRef<HTMLDivElement | null>(null);
@@ -31,7 +37,7 @@ const AddCragPopup = () => {
       style: "mapbox://styles/darius222/clg2xknp3005g01myy2e6p5rn",
       center: [21.472858, 38.181548],
       zoom: 4,
-      minZoom: 3,
+      minZoom: 2,
       pitchWithRotate: false,
       dragRotate: false,
     });
@@ -51,30 +57,62 @@ const AddCragPopup = () => {
     });
   }, [mapContainer.current]);
 
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      setImage(file);
-    } else {
-      return;
-    }
-  };
-
   const validateUserInput = () => {
-    // Name matches regex?
-    // Coordinates in range and only numbers?
-    // Description length okay?
-    // File type is image and size < 10mb?
-    // If all okay, return feedback="valid"
-    // If not, set error messages
-    // input component will receive and display error message
-    // onFocus, errorMessage will be reset
-  }
+    let userInput: "valid" | "invalid" = "valid";
+    const nameRegex = /^[A-Za-z ]{3,20}$/;
+    const latitudeRegex = /^-?(?:90(?:\.0+)?|[1-8]?\d(?:\.\d+)?|\d+\.)$/;
+    const longitudeRegex = /^-?(?:180(?:\.0+)?|\d{1,2}(?:\.\d+)?|1[0-7]\d(?:\.\d+)?|\d+\.)$/;
+
+    if (!name) {
+      setNameErrorMsg("This field is required");
+      userInput = "invalid";
+    } else if (!nameRegex.test(name)) {
+      setNameErrorMsg("Name should be 3 - 20 characters and not contain any special characters");
+      userInput = "invalid";
+    }
+
+    if (!latitude) {
+      setLatitudeErrorMsg("This field is required");
+      userInput = "invalid";
+    } else if (!latitudeRegex.test(latitude)) {
+      setLatitudeErrorMsg("Accepted value range: [-90, 90]");
+      userInput = "invalid";
+    }
+
+    if (!longitude) {
+      setLongitudeErrorMsg("This field is required");
+      userInput = "invalid";
+    } else if (!longitudeRegex.test(longitude)) {
+      setLongitudeErrorMsg("Accepted value range: [-180, 180]");
+      userInput = "invalid";
+    }
+
+    if (description && (description.length <= 25 || description.length >= 1000)) {
+      setDescriptionErrorMsg("Description should be between 25 and 1000 characters");
+      userInput = "invalid";
+    }
+
+    if (image && !image.type.startsWith("image/")) {
+      setImageErrorMsg("Invalid File type");
+      userInput = "invalid";
+    } else if (image && image.size > 7000000) {
+      setImageErrorMsg("Max. file size is 7 MB");
+      userInput = "invalid";
+    }
+
+    return userInput;
+  };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const userInputValid = validateUserInput();
-    // if (userInputValid) send to db
+    const userInput = validateUserInput();
+
+    console.log(userInput);
+
+    if (userInput === "invalid") return;
+
+    // userInput is valid
+    // If user attached an image, upload to Firebase Storage
     if (image) {
       const uploadTask = uploadToFirebaseStorage(image);
       uploadTask.on(
@@ -84,24 +122,20 @@ const AddCragPopup = () => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         },
         (error) => {
-          // Display error to user
+          // Display error to user (try it out)
           console.log(error);
+          setImageErrorMsg(`An error occured: ${error}`);
+          return;
         },
         async () => {
           const downloadURL = await getDownloadUrl(uploadTask.snapshot.ref);
-          console.log(name);
-          console.log(latitude);
-          console.log(longitude);
-          console.log(description);
-          console.log(downloadURL);
+          // downloadURL is available, start query to server
         }
       );
     } else {
-      console.log(name);
-      console.log(latitude);
-      console.log(longitude);
-      console.log(description);
+      // Start query to server
     }
+
     // Include closeBtn on Popup
     // Limit upload file size, check for file type and give corresponding errors
     // Check user input and show error messages below inputs
@@ -130,9 +164,11 @@ const AddCragPopup = () => {
             type="text"
             id="name"
             value={name}
-            addOnChange={(e) => setName(e.target.value)}
-            pattern="^[A-Za-z ]{3,20}$"
-            errorMessage="Name should be 3 - 20 characters and not contain any special characters"
+            onChange={(e) => {
+              setName(e.target.value);
+              setNameErrorMsg("");
+            }}
+            errorMessage={nameErrorMsg}
           />
           <div ref={mapContainer} className={classes.mapContainer} />
           <div className={classes.coordinates}>
@@ -141,47 +177,60 @@ const AddCragPopup = () => {
               type="text"
               id="latitude"
               value={latitude}
-              addOnChange={(e) => setLatitude(e.target.value)}
-              addOnBlur={() => map.current!.flyTo({ center: [parseFloat(longitude), parseFloat(latitude)] })}
+              onChange={(e) => {
+                setLatitude(e.target.value);
+                setLatitudeErrorMsg("");
+              }}
+              onBlur={() => map.current!.flyTo({ center: [parseFloat(longitude), parseFloat(latitude)] })}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
                   map.current!.flyTo({ center: [parseFloat(longitude), parseFloat(latitude)] });
                 }
               }}
-              pattern="^-?(?:90(?:\.0+)?|[1-8]?\d(?:\.\d+)?|\d+\.)$"
-              errorMessage="Accepted value range: [-90, 90]"
-              required
+              errorMessage={latitudeErrorMsg}
             />
             <FormInput
               label="Longitude"
               type="text"
               id="longitude"
               value={longitude}
-              addOnChange={(e) => setLongitude(e.target.value)}
-              addOnBlur={() => map.current!.flyTo({ center: [parseFloat(longitude), parseFloat(latitude)] })}
-              pattern="^-?(?:180(?:\.0+)?|\d{1,2}(?:\.\d+)?|1[0-7]\d(?:\.\d+)?|\d+\.)$"
-              errorMessage="Accepted value range: [-180, 180]"
-              required
+              onChange={(e) => {
+                setLongitude(e.target.value);
+                setLongitudeErrorMsg("");
+              }}
+              onBlur={() => map.current!.flyTo({ center: [parseFloat(longitude), parseFloat(latitude)] })}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  map.current!.flyTo({ center: [parseFloat(longitude), parseFloat(latitude)] });
+                }
+              }}
+              errorMessage={longitudeErrorMsg}
             />
           </div>
           <label htmlFor="description">Description (optional)</label>
           <textarea
             id="description"
             placeholder="What kind of rock? What kind of climbing? How to get to there? ..."
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              setDescriptionErrorMsg("");
+            }}
             value={description}
           />
           <FormInput
             label="Upload an image (optional)"
             type="file"
             id="image"
-            addOnChange={handleFileInputChange}
-            errorMessage="File should be an image and file size max. 10mb"
+            onChange={(e) => {
+              setImage(e.target.files?.[0]);
+              setImageErrorMsg("");
+            }}
+            errorMessage={imageErrorMsg}
           />
           <button type="submit">Submit</button>
         </form>
-        <span></span>
       </div>
     </div>
   );

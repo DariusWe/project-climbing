@@ -15,19 +15,17 @@
     }
   }
 
-  // Hide increment/decrement buttons on chrome:
-  input[type="number"]::-webkit-outer-spin-button,
-  input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-  }
-
-  // Hide increment/decrement buttons on firefox:
-  input[type="number"] {
-    appearance: textfield;
-  }
-
   input[type="file"] {
+    width: 40%;
     border: none;
+    padding: 0;
+  }
+
+  .invalid {
+    border: 1px solid rgb(203, 43, 43);
+    &:focus {
+      border: 1px solid rgb(203, 43, 43);
+    }
   }
 
   .errorMessage {
@@ -35,10 +33,5 @@
     bottom: 7px;
     font-size: 11px;
     color: rgb(227, 6, 6);
-    display: none;
-  }
-
-  input:invalid ~ .errorMessage {
-    display: block;
   }
 }

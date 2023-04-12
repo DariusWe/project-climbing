@@ -37,7 +37,7 @@ const App = () => {
       or
       new page with new map
       */}
-      <WorldMap geoData={geoJsonData} />
+      {/* <WorldMap geoData={geoJsonData} /> */}
       {addCragPopupOpen && <AddCragPopup />}
     </div>
   );
