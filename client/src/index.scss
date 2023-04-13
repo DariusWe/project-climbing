@@ -47,17 +47,6 @@ button {
   // transition: border-color 0.25s;
 }
 
-textarea {
-  border: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
-  padding: 5px;
-  margin-bottom: 15px;
-  &:focus {
-    outline: none;
-    border-bottom: 1px solid #aaa;
-  }
-}
-
 // @media (prefers-color-scheme: light) {
 //   :root {
 //     color: #213547;

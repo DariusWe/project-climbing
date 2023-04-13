@@ -18,10 +18,23 @@ const pool = mysql.createPool({
 });
 
 app.get("/", (req, res) => {
+  res.send("API Endpoint for getting database entries (crags): .../api/crags/get");
+});
+
+app.get("/api/crags/get", (req, res) => {
   const sqlSelect = "SELECT * FROM crags";
   pool.query(sqlSelect, (error, result) => {
     error && console.log(error);
     res.json(result);
+  });
+});
+
+app.post("/api/crags/post", (req, res) => {
+  const { name, latitude, longitude, description, img_url } = req.body;
+  const sqlInsert = "INSERT INTO crags (name, latitude, longitude, description, img_url) VALUES (?, ?, ?, ?, ?)";
+  pool.query(sqlInsert, [name, latitude, longitude, description, img_url], (err, result) => {
+    err && console.log(err);
+    !err && res.json("Submitted successfully");
   });
 });
 

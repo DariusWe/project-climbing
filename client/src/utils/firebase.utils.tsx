@@ -13,7 +13,7 @@ const firebaseConfig = {
   appId: "1:176909787151:web:cc17b02ed1bb1352db837a",
 };
 
-// Initialize
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
 export const uploadToFirebaseStorage = (file: File) => {
