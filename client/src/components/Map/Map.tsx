@@ -23,7 +23,7 @@ const WorldMap: FC<WorldMapProps> = ({ geoData }) => {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/darius222/clg2xknp3005g01myy2e6p5rn",
-      center: [21.472858, 38.181548],
+      center: [11.287380, 49.693085],
       zoom: 9,
       minZoom: 3,
       pitchWithRotate: false,
@@ -123,13 +123,12 @@ const WorldMap: FC<WorldMapProps> = ({ geoData }) => {
 
     map.current!.on("click", "unclustered-point", (e) => {
       const cragName = e.features![0].properties!["name"];
-      const cragDescription = e.features![0].properties!["description"];
       const cragImageUrl = e.features![0].properties!["imgUrl"];
       if (e.features![0].geometry.type !== "Point") return;
       const coordinates = e.features![0].geometry.coordinates.slice() as LngLatLike;
 
       const popupNode = document.createElement("div");
-      ReactDOM.createRoot(popupNode).render(<MapPopup name={cragName} description={cragDescription} imgUrl={cragImageUrl} />);
+      ReactDOM.createRoot(popupNode).render(<MapPopup name={cragName} imgUrl={cragImageUrl} />);
 
       new mapboxgl.Popup({ offset: 8 }).setLngLat(coordinates).setDOMContent(popupNode).addTo(map.current!);
     });
@@ -140,11 +139,6 @@ const WorldMap: FC<WorldMapProps> = ({ geoData }) => {
 
     map.current!.on("mouseleave", ["unclustered-point", "cluster"], () => {
       map.current!.getCanvas().style.cursor = "";
-    });
-
-    map.current!.on("contextmenu", (event) => {
-      const lngLat = mapboxgl.LngLat.convert(event.lngLat);
-      new mapboxgl.Popup({ offset: 8 }).setLngLat(lngLat).setHTML(`<span>${lngLat}</span>`).addTo(map.current!);
     });
   }, [geoData]);
 

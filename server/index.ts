@@ -31,6 +31,7 @@ app.get("/api/crags/get", (req, res) => {
 
 app.post("/api/crags/post", (req, res) => {
   const { name, latitude, longitude, description, img_url } = req.body;
+  console.log(img_url);
   const sqlInsert = "INSERT INTO crags (name, latitude, longitude, description, img_url) VALUES (?, ?, ?, ?, ?)";
   pool.query(sqlInsert, [name, latitude, longitude, description, img_url], (err, result) => {
     err && console.log(err);

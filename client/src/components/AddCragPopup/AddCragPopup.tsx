@@ -16,8 +16,7 @@ import useStore from "../../store";
 // (and vice versa). Because the map is so tightly integrated into the form, splitting this component up would make it more complex and
 // harder to test.
 
-const mapboxToken = import.meta.env.VITE_APP_MAPBOX_TOKEN;
-const nameRegex = /^[A-Za-z ]{3,20}$/;
+const nameRegex = /^[a-zA-ZäÄüÜöÖ\s]{3,30}$/;
 const latitudeRegex = /^-?(?:90(?:\.0+)?|[1-8]?\d(?:\.\d+)?|\d+\.)$/;
 const longitudeRegex = /^-?(?:180(?:\.0+)?|\d{1,2}(?:\.\d+)?|1[0-7]\d(?:\.\d+)?|\d+\.)$/;
 
@@ -25,8 +24,8 @@ const AddCragPopup = () => {
   const [setAddCragPopupOpen] = useStore((state) => [state.setAddCragPopupOpen]);
   // Controlled form input values
   const [name, setName] = useState("");
-  const [latitude, setLatitude] = useState("38.181548");
-  const [longitude, setLongitude] = useState("21.472858");
+  const [latitude, setLatitude] = useState("49.693085");
+  const [longitude, setLongitude] = useState("11.287380");
   const [description, setDescription] = useState("");
   const [imgUrl, setImgUrl] = useState("");
 
@@ -39,6 +38,7 @@ const AddCragPopup = () => {
 
   // Progress of file upload
   const [progress, setProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Crags from the database. Needed to check if the name of the new crag is already in use.
   const [crags, setCrags] = useState<Crag[]>();
@@ -78,13 +78,13 @@ const AddCragPopup = () => {
   useEffect(() => {
     if (map.current || !mapContainer.current) return;
 
-    mapboxgl.accessToken = mapboxToken;
+    mapboxgl.accessToken = import.meta.env.VITE_APP_MAPBOX_TOKEN;
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/darius222/clg2xknp3005g01myy2e6p5rn",
-      center: [21.472858, 38.181548],
-      zoom: 4,
+      style: "mapbox://styles/mapbox/satellite-streets-v12",
+      center: [11.287380, 49.693085],
+      zoom: 6,
       minZoom: 2,
       pitchWithRotate: false,
       dragRotate: false,
@@ -117,7 +117,7 @@ const AddCragPopup = () => {
     if (!e.target.value) {
       setNameErrorMsg("This field is required");
     } else if (!nameRegex.test(e.target.value)) {
-      setNameErrorMsg("Name should be 3 - 20 characters and not contain any special characters or numbers.");
+      setNameErrorMsg("Name should be 3 - 30 characters and not contain any special characters or numbers.");
     } else if (crags?.some((obj) => obj.name === e.target.value)) {
       setNameErrorMsg("Name is already used by another crag. Please choose a unique name.");
     } else {
@@ -184,6 +184,8 @@ const AddCragPopup = () => {
       setImageErrorMsg("Max. file size is 7 MB");
       return;
     }
+  
+    setIsUploading(true);
 
     const uploadTask = uploadToFirebaseStorage(file);
     uploadTask.on(
@@ -201,6 +203,7 @@ const AddCragPopup = () => {
       async () => {
         const downloadURL = await getDownloadUrl(uploadTask.snapshot.ref);
         setImgUrl(downloadURL);
+        setIsUploading(false);
       }
     );
   };
@@ -234,6 +237,8 @@ const AddCragPopup = () => {
     postCragMutation.mutate(newCrag);
   };
 
+  // Switch between satellite and normal style
+  // 
   // During this whole process show loading animation to user.
   // Form validation on frontend or backend or both?
   // Send response back to client
@@ -311,7 +316,7 @@ const AddCragPopup = () => {
             errorMessage={imageErrorMsg}
           />
           <span className={classes.progressBar}>{progress ? `${progress} %` : ""}</span>
-          <button disabled={postCragMutation.isLoading} type="submit">
+          <button disabled={postCragMutation.isLoading || isUploading} type="submit">
             Submit
           </button>
         </form>
