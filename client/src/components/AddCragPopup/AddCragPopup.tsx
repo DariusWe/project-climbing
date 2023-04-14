@@ -105,7 +105,9 @@ const AddCragPopup = () => {
       setLatitudeErrorMsg("");
       setLongitudeErrorMsg("");
     });
-  }, [mapContainer.current]);
+
+    return () => map.current!.remove();
+  }, []);
 
   /* INPUT EVENT HANDLERS BELOW *********************************************************************************************/
   // User interactions with inputs will trigger input validation and error messages handling.
@@ -222,7 +224,6 @@ const AddCragPopup = () => {
     if (nameErrorMsg || latitudeErrorMsg || longitudeErrorMsg || descriptionErrorMsg || imageErrorMsg) {
       return;
     }
-
     const newCrag: Omit<Crag, "id"> = {
       name: name,
       latitude: parseFloat(latitude),

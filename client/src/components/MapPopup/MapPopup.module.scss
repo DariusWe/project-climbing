@@ -1,0 +1,29 @@
+// NOTE: MAPBOX HAS ITS OWN CONTAINER CLASS FOR THE POPUP. WIDTH, PADDING AND BOX-SHADOW HAVE TO BE DEFINED THERE (SEE INDEX.SCSS)
+
+.mapPopup {
+  color: black;
+  display: flex;
+  flex-direction: column;
+  min-width: 320px;
+  width: fit-content;
+  padding: 0;
+  border-radius: 10px;
+
+  img {
+    width: 100%;
+    min-height: 180px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+
+  .bottomSide {
+    padding: 10px 12px;
+
+    h3 {
+        font-size: 16px;
+    }
+    p {
+        font-size: 16px;
+    }
+  }
+}

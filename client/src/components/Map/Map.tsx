@@ -1,19 +1,24 @@
 import classes from "./Map.module.scss";
 import mapboxgl, { LngLatLike, GeoJSONSource, GeoJSONSourceRaw, Map } from "mapbox-gl";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, FC } from "react";
+import ReactDOM from "react-dom/client";
+import MapPopup from "../MapPopup/MapPopup";
+
+mapboxgl.accessToken = import.meta.env.VITE_APP_MAPBOX_TOKEN;
 
 type WorldMapProps = {
-  geoData: GeoJSONSourceRaw;
+  geoData: GeoJSONSourceRaw | undefined;
 };
 
-const WorldMap: React.FC<WorldMapProps> = ({ geoData }) => {
+const WorldMap: FC<WorldMapProps> = ({ geoData }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<Map | null>();
 
+  // If geoData changes, reset map. Don't do this in a useEffect, do it right here.
+
+  // Paint the map, geoData is not beeing fetched yet
   useEffect(() => {
     if (map.current || !mapContainer.current) return;
-
-    mapboxgl.accessToken = import.meta.env.VITE_APP_MAPBOX_TOKEN;
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -24,6 +29,13 @@ const WorldMap: React.FC<WorldMapProps> = ({ geoData }) => {
       pitchWithRotate: false,
       dragRotate: false,
     });
+
+    return () => map.current!.remove();
+  }, []);
+
+  // When geodata is fetched, attach data to map
+  useEffect(() => {
+    if (!geoData || !map.current) return;
 
     map.current.on("load", () => {
       // In the following lines, typescript warns me that map.current could possibly be null or undefined, which is not true.
@@ -49,10 +61,7 @@ const WorldMap: React.FC<WorldMapProps> = ({ geoData }) => {
         filter: ["has", "point_count"],
         paint: {
           // Use step expressions (https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-step)
-          // with three steps to implement three types of circles:
-          // "circle-color": "#f8c304",
-          // "circle-color": "#ecc76f",
-          // "circle-color": "#ffe921",
+          // with three steps to implement three cluster sizes:
           "circle-color": "#fff",
           "circle-radius": ["step", ["get", "point_count"], 15, 5, 20, 20, 25],
         },
@@ -113,27 +122,16 @@ const WorldMap: React.FC<WorldMapProps> = ({ geoData }) => {
     });
 
     map.current!.on("click", "unclustered-point", (e) => {
-      // Typescript is complaining about a bunch of variables that could either be null or undefined or can't be found
-      // because of stupid fucking reasons that i have no control over. Why does everyone like typescript so much again?
-      if (
-        !e.features ||
-        !e.features[0].properties ||
-        !e.features[0].geometry ||
-        e.features[0].geometry.type !== "Point"
-      )
-        return;
-      const cragName = e.features[0].properties["name"];
-      const cragDescription = e.features[0].properties["description"];
-      const cragImageUrl = e.features[0].properties["img_url"];
-      // TS complaining about coordinates being of type Number[] instead of LngLatLike even though it's derived from Mapbox own types...
-      const coordinates = e.features[0].geometry.coordinates.slice() as LngLatLike;
-      const html = `<div class="mapbox-popup-img"></div>
-                    <div class="mapbox-popup-right-side">
-                      <h3>${cragName}</h3>
-                      <p>Some more infos like number of routes and grades</p>
-                    </div>`;
+      const cragName = e.features![0].properties!["name"];
+      const cragDescription = e.features![0].properties!["description"];
+      const cragImageUrl = e.features![0].properties!["imgUrl"];
+      if (e.features![0].geometry.type !== "Point") return;
+      const coordinates = e.features![0].geometry.coordinates.slice() as LngLatLike;
 
-      new mapboxgl.Popup({ offset: 8 }).setLngLat(coordinates).setHTML(html).addTo(map.current!);
+      const popupNode = document.createElement("div");
+      ReactDOM.createRoot(popupNode).render(<MapPopup name={cragName} description={cragDescription} imgUrl={cragImageUrl} />);
+
+      new mapboxgl.Popup({ offset: 8 }).setLngLat(coordinates).setDOMContent(popupNode).addTo(map.current!);
     });
 
     map.current!.on("mouseenter", ["unclustered-point", "cluster"], () => {
@@ -148,9 +146,7 @@ const WorldMap: React.FC<WorldMapProps> = ({ geoData }) => {
       const lngLat = mapboxgl.LngLat.convert(event.lngLat);
       new mapboxgl.Popup({ offset: 8 }).setLngLat(lngLat).setHTML(`<span>${lngLat}</span>`).addTo(map.current!);
     });
-  }, [mapContainer.current]);
-
-  // Reload map source when geodata changes
+  }, [geoData]);
 
   return <div ref={mapContainer} className={classes.mapContainer} />;
 };

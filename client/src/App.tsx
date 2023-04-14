@@ -22,7 +22,7 @@ const App = () => {
     <div className={classes.app}>
       <Header />
       <SearchResults />
-      {status === "success" && <WorldMap geoData={convertToGeoJson(data)} />}
+      <WorldMap geoData={data ? convertToGeoJson(data) : undefined} />
       {addCragPopupOpen && <AddCragPopup />}
     </div>
   );
