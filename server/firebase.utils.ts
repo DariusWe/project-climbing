@@ -3,7 +3,7 @@
 // Import the functions you need from the SDKs you need
 import dotenv from "dotenv";
 import { initializeApp } from "firebase/app";
-import { getStorage, ref, uploadBytes, getDownloadURL, StorageReference, listAll } from "firebase/storage";
+import { getStorage, ref, uploadBytes, getDownloadURL, StorageReference } from "firebase/storage";
 // More SDKs for Firebase products:
 // https://firebase.google.com/docs/web/setup#available-libraries
 
