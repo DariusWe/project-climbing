@@ -40,9 +40,8 @@ app.post("/api/crags/post", upload.single("file"), async (req, res) => {
   pool.query(sqlInsert, [name, latitude, longitude, description], (err, result) => {
     if (err) {
       console.log(err);
-      // return error?
+      // error
     } else {
-      // return success and start processing
       res.send("success");
     }
   });
@@ -53,7 +52,7 @@ app.post("/api/crags/post", upload.single("file"), async (req, res) => {
     pool.query(sqlUpdate, [fileUrls.imgUrl, fileUrls.resizedImgUrl, name], (err, result) => {
       if (err) {
         console.log(err);
-        // return error?
+        // error
       } else {
         // ...
       }
@@ -69,7 +68,7 @@ app.put("/api/crags/update-image", upload.single("file"), async (req, res) => {
   pool.query(sqlUpdate, [fileUrls.imgUrl, fileUrls.resizedImgUrl, name], (err, result) => {
     if (err) {
       console.log(err);
-      // return error?
+      // error
     } else {
       res.send("Success");
       // ...

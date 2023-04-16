@@ -1,8 +1,6 @@
 import { getDownloadUrl, uploadToFirebaseStorage } from "./firebase.utils";
 import sharp from "sharp";
 
-// NO ERROR HANDLING HERE!!!
-
 export const convertAndUploadToStorage = async (file: Express.Multer.File) => {
   // Create filenames that will be used for the uploaded images:
   const timestamp = new Date().getTime();
