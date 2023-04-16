@@ -1,5 +1,6 @@
 import classes from "./Header.module.scss";
 import useStore from "../../store";
+import UpdateCragImageBtn from "../UpdateCragImageBtn/UpdateCragImageBtn";
 
 const Header = () => {
   const [addCragPopupOpen, setAddCragPopupOpen] = useStore((state) => [state.addCragPopupOpen, state.setAddCragPopupOpen]);
@@ -17,6 +18,7 @@ const Header = () => {
         <span>Filter ...</span>
       </div>
       <div className={classes.rightSide}>
+        {/* <UpdateCragImageBtn /> */}
         {!addCragPopupOpen && <span className={classes.add} onClick={() => setAddCragPopupOpen(true)}>Add +</span>}
         {addCragPopupOpen && <span className={classes.add} onClick={() => setAddCragPopupOpen(false)}>Map</span>}
         <a href="#">Sign in</a>

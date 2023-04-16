@@ -3,6 +3,7 @@ export interface Crag {
   name: string;
   latitude: number;
   longitude: number;
-  img_url?: string;
   description?: string;
+  img_url?: string;
+  img_url_small?: string;
 }

@@ -14,8 +14,7 @@ const convertToGeoJson = (crags:Crag[]): GeoJSONSourceRaw => {
       properties: {
         id: crag.id,
         name: crag.name,
-        imgUrl: crag.img_url,
-        description: crag.description,
+        imgUrlSmall: crag.img_url_small,
       },
     };
   });

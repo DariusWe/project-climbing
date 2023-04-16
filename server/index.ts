@@ -2,11 +2,14 @@ import express from "express";
 import mysql from "mysql2";
 import dotenv from "dotenv";
 import cors from "cors";
+import multer from "multer";
+import { convertAndUploadToStorage } from "./helperFunctions";
 
 dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+const upload = multer();
 
 // createPool() - unlike createConnection() - creates and releases connections on the go and automatically.
 const pool = mysql.createPool({
@@ -29,13 +32,48 @@ app.get("/api/crags/get", (req, res) => {
   });
 });
 
-app.post("/api/crags/post", (req, res) => {
-  const { name, latitude, longitude, description, img_url } = req.body;
-  console.log(img_url);
-  const sqlInsert = "INSERT INTO crags (name, latitude, longitude, description, img_url) VALUES (?, ?, ?, ?, ?)";
-  pool.query(sqlInsert, [name, latitude, longitude, description, img_url], (err, result) => {
-    err && console.log(err);
-    !err && res.json("Submitted successfully");
+app.post("/api/crags/post", upload.single("file"), async (req, res) => {
+  const { name, latitude, longitude, description } = req.body;
+  const file = req.file;
+
+  const sqlInsert = "INSERT INTO crags (name, latitude, longitude, description) VALUES (?, ?, ?, ?)";
+  pool.query(sqlInsert, [name, latitude, longitude, description], (err, result) => {
+    if (err) {
+      console.log(err);
+      // return error?
+    } else {
+      // return success and start processing
+      res.send("success");
+    }
+  });
+
+  if (file) {
+    const fileUrls = await convertAndUploadToStorage(file);
+    const sqlUpdate = "UPDATE crags SET img_url = ?, img_url_small = ? WHERE name = ?";
+    pool.query(sqlUpdate, [fileUrls.imgUrl, fileUrls.resizedImgUrl, name], (err, result) => {
+      if (err) {
+        console.log(err);
+        // return error?
+      } else {
+        // ...
+      }
+    });
+  }
+});
+
+app.put("/api/crags/update-image", upload.single("file"), async (req, res) => {
+  const { name } = req.body;
+  const file = req.file!;
+  const fileUrls = await convertAndUploadToStorage(file);
+  const sqlUpdate = "UPDATE crags SET img_url = ?, img_url_small = ? WHERE name = ?";
+  pool.query(sqlUpdate, [fileUrls.imgUrl, fileUrls.resizedImgUrl, name], (err, result) => {
+    if (err) {
+      console.log(err);
+      // return error?
+    } else {
+      res.send("Success");
+      // ...
+    }
   });
 });
 

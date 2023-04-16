@@ -3,7 +3,6 @@ import { useState, useRef, useEffect, FormEvent, ChangeEvent, FocusEvent } from 
 import mapboxgl, { Map } from "mapbox-gl";
 import markerImage from "../../assets/marker.png";
 import FormInput from "../FormInput/FormInput";
-import { getDownloadUrl, uploadToFirebaseStorage } from "../../utils/firebase.utils";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { fetchCrags, postCrag } from "../../api/queries";
 import type { Crag } from "../../api/types";
@@ -27,7 +26,7 @@ const AddCragPopup = () => {
   const [latitude, setLatitude] = useState("49.693085");
   const [longitude, setLongitude] = useState("11.287380");
   const [description, setDescription] = useState("");
-  const [imgUrl, setImgUrl] = useState("");
+  const [imgFile, setImgFile] = useState<File>();
 
   // Error messages shown under input fields
   const [nameErrorMsg, setNameErrorMsg] = useState("");
@@ -35,10 +34,6 @@ const AddCragPopup = () => {
   const [longitudeErrorMsg, setLongitudeErrorMsg] = useState("");
   const [descriptionErrorMsg, setDescriptionErrorMsg] = useState("");
   const [imageErrorMsg, setImageErrorMsg] = useState("");
-
-  // Progress of file upload
-  const [progress, setProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
 
   // Crags from the database. Needed to check if the name of the new crag is already in use.
   const [crags, setCrags] = useState<Crag[]>();
@@ -83,7 +78,7 @@ const AddCragPopup = () => {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/satellite-streets-v12",
-      center: [11.287380, 49.693085],
+      center: [11.28738, 49.693085],
       zoom: 6,
       minZoom: 2,
       pitchWithRotate: false,
@@ -184,28 +179,8 @@ const AddCragPopup = () => {
       setImageErrorMsg("Max. file size is 7 MB");
       return;
     }
-  
-    setIsUploading(true);
 
-    const uploadTask = uploadToFirebaseStorage(file);
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-        setProgress(progress);
-      },
-      (error) => {
-        // ToDo: Display error to user (try it out)
-        console.log(error);
-        setImageErrorMsg(`An error occured: ${error}`);
-        return;
-      },
-      async () => {
-        const downloadURL = await getDownloadUrl(uploadTask.snapshot.ref);
-        setImgUrl(downloadURL);
-        setIsUploading(false);
-      }
-    );
+    setImgFile(file);
   };
 
   /* ************************************************************************************************************************/
@@ -227,18 +202,20 @@ const AddCragPopup = () => {
     if (nameErrorMsg || latitudeErrorMsg || longitudeErrorMsg || descriptionErrorMsg || imageErrorMsg) {
       return;
     }
-    const newCrag: Omit<Crag, "id"> = {
-      name: name,
-      latitude: parseFloat(latitude),
-      longitude: parseFloat(longitude),
-      description: description,
-      img_url: imgUrl,
-    };
-    postCragMutation.mutate(newCrag);
+
+    const formData = new FormData();
+    
+    formData.append('name', name);
+    formData.append('latitude', latitude);
+    formData.append('longitude', longitude);
+    formData.append('description', description);
+    imgFile && formData.append("file", imgFile);
+
+    postCragMutation.mutate(formData);
   };
 
   // Switch between satellite and normal style
-  // 
+  //
   // During this whole process show loading animation to user.
   // Form validation on frontend or backend or both?
   // Send response back to client
@@ -315,8 +292,7 @@ const AddCragPopup = () => {
             onChange={handleFileChange}
             errorMessage={imageErrorMsg}
           />
-          <span className={classes.progressBar}>{progress ? `${progress} %` : ""}</span>
-          <button disabled={postCragMutation.isLoading || isUploading} type="submit">
+          <button disabled={postCragMutation.isLoading} type="submit">
             Submit
           </button>
         </form>

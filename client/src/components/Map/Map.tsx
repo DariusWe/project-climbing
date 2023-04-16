@@ -123,7 +123,7 @@ const WorldMap: FC<WorldMapProps> = ({ geoData }) => {
 
     map.current!.on("click", "unclustered-point", (e) => {
       const cragName = e.features![0].properties!["name"];
-      const cragImageUrl = e.features![0].properties!["imgUrl"];
+      const cragImageUrl = e.features![0].properties!["imgUrlSmall"];
       if (e.features![0].geometry.type !== "Point") return;
       const coordinates = e.features![0].geometry.coordinates.slice() as LngLatLike;
 
