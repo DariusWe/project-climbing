@@ -1,18 +1,21 @@
 // Is nodemon watching this file?
 
 // Import the functions you need from the SDKs you need
+import dotenv from "dotenv";
 import { initializeApp } from "firebase/app";
 import { getStorage, ref, uploadBytes, getDownloadURL, StorageReference, listAll } from "firebase/storage";
 // More SDKs for Firebase products:
 // https://firebase.google.com/docs/web/setup#available-libraries
 
+dotenv.config();
+
 const firebaseConfig = {
-  apiKey: "AIzaSyCObzWeNbQ6RVvJ1XDbVYY3J_G3ZWhI3S8",
-  authDomain: "climbing-app-fdccd.firebaseapp.com",
-  projectId: "climbing-app-fdccd",
-  storageBucket: "climbing-app-fdccd.appspot.com",
-  messagingSenderId: "176909787151",
-  appId: "1:176909787151:web:cc17b02ed1bb1352db837a",
+  apiKey: process.env.FIREBASEKEY,
+  authDomain: process.env.FIREBASEDOMAIN,
+  projectId: process.env.FIREBASEPROJECTID,
+  storageBucket: process.env.FIREBASESTORAGEBUCKET,
+  messagingSenderId: process.env.FIREBASESENDERID,
+  appId: process.env.FIREBASEAPPID,
 };
 
 // Initialize Firebase
