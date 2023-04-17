@@ -8,7 +8,7 @@ export const fetchCrags = async () => {
 
 export const postCrag = async (newCrag: FormData) => {
   try {
-      await fetch(`${BASE_URL}/api/crags/post`, {
+    await fetch(`${BASE_URL}/api/crags/post`, {
       method: "POST",
       body: newCrag,
       // return that it was successfull?
@@ -20,10 +20,21 @@ export const postCrag = async (newCrag: FormData) => {
 
 export const updateCragImage = async (formData: FormData) => {
   try {
-      await fetch(`${BASE_URL}/api/crags/update-image`, {
+    await fetch(`${BASE_URL}/api/crags/update-image`, {
       method: "PUT",
       body: formData,
       // return that it was successfull?
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const postRoute = async (newRoute: FormData) => {
+  try {
+    await fetch(`${BASE_URL}/api/routes/post`, {
+      method: "POST",
+      body: newRoute,
     });
   } catch (err) {
     console.log(err);

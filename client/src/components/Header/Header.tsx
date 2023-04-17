@@ -1,9 +1,15 @@
 import classes from "./Header.module.scss";
 import useStore from "../../store";
+import { useState } from "react";
 import UpdateCragImageBtn from "../UpdateCragImageBtn/UpdateCragImageBtn";
 
 const Header = () => {
-  const [addCragFormOpen, setAddCragFormOpen] = useStore((state) => [state.addCragFormOpen, state.setAddCragFormOpen]);
+  const [setIsAddCragFormOpen, setIsAddRouteFormOpen] = useStore((state) => [state.setIsAddCragFormOpen, state.setIsAddRouteFormOpen]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const toggleDropdown = () => {
+    isDropdownOpen ? setIsDropdownOpen(false) : setIsDropdownOpen(true);
+  };
 
   return (
     <header className={classes.header}>
@@ -19,8 +25,15 @@ const Header = () => {
       </div>
       <div className={classes.rightSide}>
         {/* <UpdateCragImageBtn /> */}
-        {!addCragFormOpen && <span className={classes.add} onClick={() => setAddCragFormOpen(true)}>Add +</span>}
-        {addCragFormOpen && <span className={classes.add} onClick={() => setAddCragFormOpen(false)}>Map</span>}
+        <span className={classes.add} onClick={toggleDropdown}>
+          Add<i className="fa-solid fa-angle-down"></i>
+        </span>
+        {isDropdownOpen && (
+          <div className={classes.dropdownMenu} onClick={() => {setIsDropdownOpen(false)}}>
+            <span onClick={() => setIsAddCragFormOpen(true)}>Crag</span>
+            <span onClick={() => setIsAddRouteFormOpen(true)}>Route</span>
+          </div>
+        )}
         <a href="#">Sign in</a>
       </div>
     </header>

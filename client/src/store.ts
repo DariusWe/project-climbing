@@ -1,17 +1,21 @@
 import { create } from "zustand";
 
 type State = {
-  addCragFormOpen: boolean;
+  isAddCragFormOpen: boolean;
+  isAddRouteFormOpen: boolean
 };
 
 type Action = {
-  setAddCragFormOpen: (boolean: boolean) => void;
+  setIsAddCragFormOpen: (boolean: boolean) => void;
+  setIsAddRouteFormOpen: (boolean: boolean) => void;
 };
 
 // Create Store
 const useStore = create<State & Action>()((set) => ({
-  addCragFormOpen: false,
-  setAddCragFormOpen: (boolean) => set(() => ({ addCragFormOpen: boolean })),
+  isAddCragFormOpen: false,
+  setIsAddCragFormOpen: (boolean) => set(() => ({ isAddCragFormOpen: boolean })),
+  isAddRouteFormOpen: false,
+  setIsAddRouteFormOpen: (boolean) => set(() => ({ isAddRouteFormOpen: boolean }))
 }));
 
 export default useStore;

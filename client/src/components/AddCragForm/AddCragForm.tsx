@@ -21,7 +21,8 @@ const latitudeRegex = /^-?(?:90(?:\.0+)?|[1-8]?\d(?:\.\d+)?|\d+\.)$/;
 const longitudeRegex = /^-?(?:180(?:\.0+)?|\d{1,2}(?:\.\d+)?|1[0-7]\d(?:\.\d+)?|\d+\.)$/;
 
 const AddCragForm = () => {
-  const [setAddCragFormOpen] = useStore((state) => [state.setAddCragFormOpen]);
+  const [setIsAddCragFormOpen] = useStore((state) => [state.setIsAddCragFormOpen]);
+
   // Controlled form input values
   const [name, setName] = useState("");
   const [latitude, setLatitude] = useState("49.693085");
@@ -228,7 +229,7 @@ const AddCragForm = () => {
   // New marker
 
   return (
-    <Popup closeFn={() => setAddCragFormOpen(false)}>
+    <Popup closeFn={() => setIsAddCragFormOpen(false)}>
       <h2>Add new crag</h2>
       <p>You can't find the crag you're looking for or discovered a new one? Create a new entry here!</p>
       <form onSubmit={handleSubmit}>

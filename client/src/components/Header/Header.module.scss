@@ -8,7 +8,7 @@
   z-index: 2;
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
 
-  // Padding and align-items: center in a mixed-in? Right now only first childrens of .header are affected, .add and sign-in have an 
+  // Padding and align-items: center in a mixed-in? Right now only first childrens of .header are affected, .add and sign-in have an
   // unnecessary redeclaration of these properties.
 
   & > * {
@@ -42,15 +42,45 @@
     .add {
       height: 100%;
       display: flex;
+      justify-content: center;
       align-items: center;
-      padding: 0 50px;
+      width: 100px;
       border-left: 1px solid #ccc;
       border-right: 1px solid #ccc;
       cursor: pointer;
-      
+
+      i {
+        font-size: 12px;
+        margin-top: 5px;
+        margin-left: 10px;
+      }
+
       &:hover {
-        background-color: black;
-        color: white;
+        background-color: #f6f6f6;
+      }
+    }
+
+    .dropdownMenu {
+      position: absolute;
+      top: 45px;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100px;
+      background-color: white;
+
+      span {
+        width: 100%;
+        height: 45px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+
+        &:hover {
+          background-color: #f6f6f6;
+        }
       }
     }
 

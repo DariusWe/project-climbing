@@ -13,6 +13,7 @@ type CragMapProps = {
 const CragMap: FC<CragMapProps> = ({ geoData }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<Map | null>();
+  const popup = useRef<mapboxgl.Popup>();
 
   // If geoData changes, reset map. Don't do this in a useEffect, do it right here.
 
@@ -122,17 +123,18 @@ const CragMap: FC<CragMapProps> = ({ geoData }) => {
     });
 
     map.current!.on("click", "unclustered-point", (e) => {
+      // Get properties of that point (crag)
       const cragName = e.features![0].properties!["name"];
       const cragImageUrl = e.features![0].properties!["imgUrlSmall"];
       if (e.features![0].geometry.type !== "Point") return;
       const coordinates = e.features![0].geometry.coordinates.slice() as LngLatLike;
-
+      // If popup already exists, remove it
+      popup.current && popup.current.remove();
+      // create new Popup and save it to popup ref
       const popupNode = document.createElement("div");
       ReactDOM.createRoot(popupNode).render(<MapboxPopup name={cragName} imgUrl={cragImageUrl} />);
-
-      console.log("Creating new Popup")
-
-      new mapboxgl.Popup({ offset: 8 }).setLngLat(coordinates).setDOMContent(popupNode).addTo(map.current!);
+      const newPopup = new mapboxgl.Popup({ offset: 8 }).setLngLat(coordinates).setDOMContent(popupNode).addTo(map.current!);
+      popup.current = newPopup;
     });
 
     map.current!.on("mouseenter", ["unclustered-point", "cluster"], () => {

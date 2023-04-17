@@ -8,9 +8,10 @@ import SearchResults from "./components/SearchResults/SearchResults";
 import AddCragPopup from "./components/AddCragForm/AddCragForm";
 import useStore from "./store";
 import Popup from "./components/Popup/Popup";
+import AddRouteForm from "./components/AddRouteForm/AddRouteForm";
 
 const App = () => {
-  const [addCragPopupOpen] = useStore((state) => [state.addCragFormOpen]);
+  const [isAddCragPopupOpen, isAddRouteFormOpen] = useStore((state) => [state.isAddCragFormOpen, state.isAddRouteFormOpen]);
 
   // Fetch crags from the server. In the future this data could be several thousand entries, fetching them all at once and saving them in
   // cache might not be the best idea. Server side clustering would be the better strategy then.
@@ -23,8 +24,9 @@ const App = () => {
     <div className={classes.app}>
       <Header />
       <SearchResults />
-      <CragMap geoData={data ? convertToGeoJson(data) : undefined} />
-      {addCragPopupOpen && <AddCragPopup />}
+      {/* <CragMap geoData={data ? convertToGeoJson(data) : undefined} /> */}
+      {isAddCragPopupOpen && <AddCragPopup />}
+      {isAddRouteFormOpen && <AddRouteForm />}
       {/* <Popup /> */}
     </div>
   );

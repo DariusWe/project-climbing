@@ -36,6 +36,7 @@ app.post("/api/crags/post", upload.single("file"), async (req, res) => {
   const { name, latitude, longitude, description } = req.body;
   const file = req.file;
 
+  // First push everything but file into db. If success, return success message to client.
   const sqlInsert = "INSERT INTO crags (name, latitude, longitude, description) VALUES (?, ?, ?, ?)";
   pool.query(sqlInsert, [name, latitude, longitude, description], (err, result) => {
     if (err) {
@@ -46,6 +47,7 @@ app.post("/api/crags/post", upload.single("file"), async (req, res) => {
     }
   });
 
+  // After ending the http request, start processing and uploading the file. This process takes several seconds.
   if (file) {
     const fileUrls = await convertAndUploadToStorage(file);
     const sqlUpdate = "UPDATE crags SET img_url = ?, img_url_small = ? WHERE name = ?";
