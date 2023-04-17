@@ -1,15 +1,15 @@
 import { FC } from "react";
-import classes from "./MapPopup.module.scss";
+import classes from "./MapboxPopup.module.scss";
 import NoImageAvailable from "../../assets/noimageavailable.png";
 
-type MapPopupProps = {
+type MapboxPopupProps = {
   name: string;
   imgUrl: string;
 };
 
-const MapPopup: FC<MapPopupProps> = ({ name, imgUrl }) => {
+const MapboxPopup: FC<MapboxPopupProps> = ({ name, imgUrl }) => {
   return (
-    <div className={classes.mapPopup}>
+    <div className={classes.mapboxPopup}>
       <div className={classes.popupImg} style={{ backgroundImage: `url(${imgUrl}), url(${NoImageAvailable})` }} />
       <div className={classes.bottomSide}>
         <h3>{name}</h3>
@@ -19,4 +19,4 @@ const MapPopup: FC<MapPopupProps> = ({ name, imgUrl }) => {
   );
 };
 
-export default MapPopup;
+export default MapboxPopup;

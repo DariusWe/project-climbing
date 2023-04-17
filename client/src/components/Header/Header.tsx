@@ -3,7 +3,7 @@ import useStore from "../../store";
 import UpdateCragImageBtn from "../UpdateCragImageBtn/UpdateCragImageBtn";
 
 const Header = () => {
-  const [addCragPopupOpen, setAddCragPopupOpen] = useStore((state) => [state.addCragPopupOpen, state.setAddCragPopupOpen]);
+  const [addCragFormOpen, setAddCragFormOpen] = useStore((state) => [state.addCragFormOpen, state.setAddCragFormOpen]);
 
   return (
     <header className={classes.header}>
@@ -19,8 +19,8 @@ const Header = () => {
       </div>
       <div className={classes.rightSide}>
         {/* <UpdateCragImageBtn /> */}
-        {!addCragPopupOpen && <span className={classes.add} onClick={() => setAddCragPopupOpen(true)}>Add +</span>}
-        {addCragPopupOpen && <span className={classes.add} onClick={() => setAddCragPopupOpen(false)}>Map</span>}
+        {!addCragFormOpen && <span className={classes.add} onClick={() => setAddCragFormOpen(true)}>Add +</span>}
+        {addCragFormOpen && <span className={classes.add} onClick={() => setAddCragFormOpen(false)}>Map</span>}
         <a href="#">Sign in</a>
       </div>
     </header>

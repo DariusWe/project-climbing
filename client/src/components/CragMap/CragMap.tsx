@@ -1,16 +1,16 @@
-import classes from "./Map.module.scss";
+import classes from "./CragMap.module.scss";
 import mapboxgl, { LngLatLike, GeoJSONSource, GeoJSONSourceRaw, Map } from "mapbox-gl";
 import { useRef, useEffect, FC } from "react";
 import ReactDOM from "react-dom/client";
-import MapPopup from "../MapPopup/MapPopup";
+import MapboxPopup from "../MapboxPopup/MapboxPopup";
 
 mapboxgl.accessToken = import.meta.env.VITE_APP_MAPBOX_TOKEN;
 
-type WorldMapProps = {
+type CragMapProps = {
   geoData: GeoJSONSourceRaw | undefined;
 };
 
-const WorldMap: FC<WorldMapProps> = ({ geoData }) => {
+const CragMap: FC<CragMapProps> = ({ geoData }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<Map | null>();
 
@@ -128,7 +128,9 @@ const WorldMap: FC<WorldMapProps> = ({ geoData }) => {
       const coordinates = e.features![0].geometry.coordinates.slice() as LngLatLike;
 
       const popupNode = document.createElement("div");
-      ReactDOM.createRoot(popupNode).render(<MapPopup name={cragName} imgUrl={cragImageUrl} />);
+      ReactDOM.createRoot(popupNode).render(<MapboxPopup name={cragName} imgUrl={cragImageUrl} />);
+
+      console.log("Creating new Popup")
 
       new mapboxgl.Popup({ offset: 8 }).setLngLat(coordinates).setDOMContent(popupNode).addTo(map.current!);
     });
@@ -145,4 +147,4 @@ const WorldMap: FC<WorldMapProps> = ({ geoData }) => {
   return <div ref={mapContainer} className={classes.mapContainer} />;
 };
 
-export default WorldMap;
+export default CragMap;

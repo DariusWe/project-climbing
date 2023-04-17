@@ -1,4 +1,4 @@
-import classes from "./AddCragPopup.module.scss";
+import classes from "./AddCragForm.module.scss";
 import { useState, useRef, useEffect, FormEvent, ChangeEvent, FocusEvent } from "react";
 import mapboxgl, { Map } from "mapbox-gl";
 import markerImage from "../../assets/marker.png";
@@ -8,6 +8,7 @@ import { fetchCrags, postCrag } from "../../api/queries";
 import type { Crag } from "../../api/types";
 import FormTextarea from "../FormTextarea/FormTextarea";
 import useStore from "../../store";
+import Popup from "../Popup/Popup";
 
 // While beeing pretty straight forward, this component is large. It contains a form with user input validation and custom error
 // handling as well as the functionality for a Mapbox map. The map is used to make it easier for the user to select the coordinates for
@@ -19,8 +20,8 @@ const nameRegex = /^[a-zA-ZäÄüÜöÖ\s]{3,30}$/;
 const latitudeRegex = /^-?(?:90(?:\.0+)?|[1-8]?\d(?:\.\d+)?|\d+\.)$/;
 const longitudeRegex = /^-?(?:180(?:\.0+)?|\d{1,2}(?:\.\d+)?|1[0-7]\d(?:\.\d+)?|\d+\.)$/;
 
-const AddCragPopup = () => {
-  const [setAddCragPopupOpen] = useStore((state) => [state.setAddCragPopupOpen]);
+const AddCragForm = () => {
+  const [setAddCragFormOpen] = useStore((state) => [state.setAddCragFormOpen]);
   // Controlled form input values
   const [name, setName] = useState("");
   const [latitude, setLatitude] = useState("49.693085");
@@ -204,11 +205,11 @@ const AddCragPopup = () => {
     }
 
     const formData = new FormData();
-    
-    formData.append('name', name);
-    formData.append('latitude', latitude);
-    formData.append('longitude', longitude);
-    formData.append('description', description);
+
+    formData.append("name", name);
+    formData.append("latitude", latitude);
+    formData.append("longitude", longitude);
+    formData.append("description", description);
     imgFile && formData.append("file", imgFile);
 
     postCragMutation.mutate(formData);
@@ -227,78 +228,73 @@ const AddCragPopup = () => {
   // New marker
 
   return (
-    <div className={classes.container}>
-      <div className={classes.popup}>
-        <span className={classes.closeBtn} onClick={() => setAddCragPopupOpen(false)}>
-          X
-        </span>
-        <h2>Add new crag</h2>
-        <p>You can't find the crag you're looking for or discovered a new one? Create a new entry here!</p>
-        <form onSubmit={handleSubmit}>
+    <Popup closeFn={() => setAddCragFormOpen(false)}>
+      <h2>Add new crag</h2>
+      <p>You can't find the crag you're looking for or discovered a new one? Create a new entry here!</p>
+      <form onSubmit={handleSubmit}>
+        <FormInput
+          label="Name"
+          placeholder="Name of crag"
+          type="text"
+          id="name"
+          value={name}
+          onChange={handleNameChange}
+          errorMessage={nameErrorMsg}
+        />
+        <div ref={mapContainer} className={classes.mapContainer} />
+        <div className={classes.coordinates}>
           <FormInput
-            label="Name"
-            placeholder="Name of crag"
+            label="Latitude"
             type="text"
-            id="name"
-            value={name}
-            onChange={handleNameChange}
-            errorMessage={nameErrorMsg}
-          />
-          <div ref={mapContainer} className={classes.mapContainer} />
-          <div className={classes.coordinates}>
-            <FormInput
-              label="Latitude"
-              type="text"
-              id="latitude"
-              value={latitude}
-              onChange={handleLatitudeChange}
-              onBlur={handleLatitudeFocusOut}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  // map.current!.flyTo({ center: [parseFloat(longitude), parseFloat(latitude)] });
-                }
-              }}
-              errorMessage={latitudeErrorMsg}
-            />
-            <FormInput
-              label="Longitude"
-              type="text"
-              id="longitude"
-              value={longitude}
-              onChange={handleLongitudeChange}
-              onBlur={handleLongitudeFocusOut}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  // map.current!.flyTo({ center: [parseFloat(longitude), parseFloat(latitude)] });
-                }
-              }}
-              errorMessage={longitudeErrorMsg}
-            />
-          </div>
-          <FormTextarea
-            label="Description (optional)"
-            id="description"
-            placeholder="What kind of rock? What kind of climbing? How to get to there? ..."
-            onChange={handleDescriptionChange}
-            value={description}
-            errorMessage={descriptionErrorMsg}
+            id="latitude"
+            value={latitude}
+            onChange={handleLatitudeChange}
+            onBlur={handleLatitudeFocusOut}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                // map.current!.flyTo({ center: [parseFloat(longitude), parseFloat(latitude)] });
+              }
+            }}
+            errorMessage={latitudeErrorMsg}
           />
           <FormInput
-            label="Upload an image (optional)"
-            type="file"
-            id="image"
-            onChange={handleFileChange}
-            errorMessage={imageErrorMsg}
+            label="Longitude"
+            type="text"
+            id="longitude"
+            value={longitude}
+            onChange={handleLongitudeChange}
+            onBlur={handleLongitudeFocusOut}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                // map.current!.flyTo({ center: [parseFloat(longitude), parseFloat(latitude)] });
+              }
+            }}
+            errorMessage={longitudeErrorMsg}
           />
-          <button disabled={postCragMutation.isLoading} type="submit">
-            Submit
-          </button>
-        </form>
-      </div>
-    </div>
+        </div>
+        <FormTextarea
+          label="Description (optional)"
+          id="description"
+          placeholder="What kind of rock? What kind of climbing? How to get to there? ..."
+          onChange={handleDescriptionChange}
+          value={description}
+          errorMessage={descriptionErrorMsg}
+        />
+        <FormInput
+          label="Upload an image (optional)"
+          type="file"
+          id="image"
+          onChange={handleFileChange}
+          errorMessage={imageErrorMsg}
+        />
+        <button disabled={postCragMutation.isLoading} type="submit">
+          Submit
+        </button>
+      </form>
+    </Popup>
   );
 };
 
-export default AddCragPopup;
+export default AddCragForm;

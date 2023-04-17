@@ -1,6 +1,6 @@
 // NOTE: MAPBOX HAS ITS OWN CONTAINER CLASS FOR THE POPUP. WIDTH, HEIGHT, PADDING ETC. HAVE TO BE DEFINED THERE (SEE INDEX.SCSS)
 
-.mapPopup {
+.mapboxPopup {
   width: 100%;
   display: flex;
   flex-direction: column;
